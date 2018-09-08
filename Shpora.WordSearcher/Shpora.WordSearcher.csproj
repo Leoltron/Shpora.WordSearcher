@@ -47,6 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArrayExtensions.cs" />
+    <Compile Include="Direction.cs" />
+    <Compile Include="DirectionExtensions.cs" />
+    <Compile Include="HttpResponseMessageExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WordSearcher.cs" />
