@@ -17,12 +17,14 @@ namespace Shpora.WordSearcher
         public int X { get; private set; }
         public int Y { get; private set; }
 
+        public bool SeesAnything => CurrentView?.Any(b => b) ?? false;
+
         public WordSearcher(HttpClient client)
         {
             this.client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
-        public async Task InitGameAsync(bool test = false)
+        public async Task InitGameAsync(bool test = false, bool retryIfConflict = false)
         {
             var request = "/task/game/start";
             if (test)
@@ -51,10 +53,29 @@ namespace Shpora.WordSearcher
             Moves = stats["moves"];
         }
 
+        public async Task Move(Direction direction, int amount, bool updateView = true)
+        {
+            //Console.WriteLine($"Before move X:{X} Y:{Y}");
+            if (amount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(amount), amount, "Value must be positive");
+            var request = $"/task/move/{direction}";
+            HttpResponseMessage response = null;
+            for (var i = 0; i < amount; i++)
+            {
+                response = await client.PostAsync(request, null);
+                response.EnsureSuccessStatusCode();
+            }
+
+            CurrentView = updateView ? ReadField(await response.Content.ReadAsStringAsync()) : emptyField;
+            var (dx, dy) = direction.ToCoordsChange();
+            X += dx * amount;
+            Y += dy * amount;
+            //Console.WriteLine($"After move X:{X} Y:{Y}");
+        }
+
         public async Task Move(Direction direction, bool updateView = true)
         {
-
-            Console.WriteLine($"X:{X} Y:{Y}");
+            //Console.WriteLine($"X:{X} Y:{Y}");
             var response = await client.PostAsync($"/task/move/{direction}", null);
             response.EnsureSuccessStatusCode();
             CurrentView = updateView ? ReadField(await response.Content.ReadAsStringAsync()) : emptyField;
@@ -67,6 +88,8 @@ namespace Shpora.WordSearcher
         {
             if (string.IsNullOrWhiteSpace(fieldString))
                 return emptyField;
+            //Console.WriteLine(fieldString);
+            //Console.WriteLine();
             var rows = fieldString.Split(new[] {"\r\n"}, StringSplitOptions.None);
             var field = new bool[rows.First().Length, rows.Length];
             for (var x = 0; x < field.GetLength(0); x++)

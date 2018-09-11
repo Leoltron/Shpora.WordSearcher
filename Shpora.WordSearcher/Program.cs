@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
+using static Shpora.WordSearcher.Direction;
 
 namespace Shpora.WordSearcher
 {
@@ -17,44 +16,109 @@ namespace Shpora.WordSearcher
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", token);
 
             var ws = new WordSearcher(client);
-            await ws.InitGameAsync(true);
-            await ws.UpdateStatsAsync();
-            await ws.Move(Direction.Left);
-            await ws.Move(Direction.Right);
-            var cd = Direction.Right;
-            var height = ws.CurrentView.GetLength(1);
-            var width = ws.CurrentView.GetLength(0);
-            var b = new bool[500, 100];
-            for (var i = 0; i < 10; i++)
+            await ws.InitGameAsync(false);
+            try
             {
-                for (var j = 0; j < 50; j++)
+                await WsMain(ws);
+            }
+            finally
+            {
+                await ws.FinishGameAsync();
+                Console.WriteLine("Session finished. Total points: "+ws.Points);
+            }
+        }
+
+        private static async Task WsMain(WordSearcher ws)
+        {
+            Console.WriteLine("Looking for non-empty view for width and height estimation...");
+            var linesChecked = 0;
+            while (true)
+            {
+                var searchRange = 50 + linesChecked / 5 * 20;
+                var foundSomething = await MoveUntilSeeAnything(ws, (linesChecked & 1) == 0 ? Right : Left, searchRange);
+                if (foundSomething)
+                    break;
+
+                Console.WriteLine($"Found nothing in range {searchRange} on line, going {Constants.VisibleFieldHeight} lower... (current Y:{ws.Y})");
+                linesChecked++;
+                await ws.Move(Down, Constants.VisibleFieldHeight);
+            }
+            Console.WriteLine("Non-empty view found.");
+
+            Console.WriteLine("Estimating width...");
+            Console.WriteLine("Going right until find border view again...");
+            var borderView = new bool[Constants.VisibleFieldWidth, Constants.VisibleFieldHeight];
+            Array.Copy(ws.CurrentView, borderView, ws.CurrentView.Length);
+
+            var viewHashes = new List<ulong>();
+            var width = 0;
+            while (true)
+            {
+                do
                 {
-                    for (var k = 1; k < width; k++)
+                    await ws.Move(Right);
+                    viewHashes.Add(ws.CurrentView.CustomHashCode());
+                    width++;
+                } while (!ws.CurrentView.ArrayEquals(borderView));
+
+                Console.WriteLine("Border view found again, going right further to check that line is repeating itself...");
+
+                var checkViewHashes = new List<ulong>(width);
+                var patternMatches = true;
+                for (var i = 0; i < width; i++)
+                {
+                    await ws.Move(Right);
+                    checkViewHashes.Add(ws.CurrentView.CustomHashCode());
+                    if (checkViewHashes[i] != viewHashes[i])
                     {
-                        await ws.Move(cd, false);
+                        patternMatches = false;
+                        viewHashes.AddRange(checkViewHashes);
+                        Console.WriteLine("Got an unexpected view, continuing searching for border view..");
+                        break;
                     }
-
-                    await MoveAndUpdate(ws, cd, b);
                 }
 
-                for (var j = 1; j < height; j++)
-                    await ws.Move(Direction.Down, false);
-                await MoveAndUpdate(ws, Direction.Down, b);
-                cd = cd == Direction.Right ? Direction.Left : Direction.Right;
+                if (patternMatches)
+                    break;
             }
+            Console.WriteLine("Line repeated, estimated width most likely is correct.");
+            Console.WriteLine("Estimated width: " + width);
 
-            for (var y = 0; y < 100; y++)
+            Console.WriteLine("Estimating height...");
+            Console.WriteLine("Going down until find border view again...");
+            viewHashes.Clear();
+            var height = 0;
+            while (true)
             {
-                var sb = new StringBuilder(100);
-                for (var x = 0; x < 100; x++)
+                do
                 {
-                    sb.Append(b[x, y] ? "#" : "_");
+                    await ws.Move(Down);
+                    viewHashes.Add(ws.CurrentView.CustomHashCode());
+                    height++;
+                } while (!ws.CurrentView.ArrayEquals(borderView));
+
+                Console.WriteLine("Border view found again, going down further to check that column is repeating itself...");
+
+                var checkViewHashes = new List<ulong>(height);
+                var patternMatches = true;
+                for (var i = 0; i < height; i++)
+                {
+                    await ws.Move(Down);
+                    checkViewHashes.Add(ws.CurrentView.CustomHashCode());
+                    if (checkViewHashes[i] != viewHashes[i])
+                    {
+                        patternMatches = false;
+                        viewHashes.AddRange(checkViewHashes);
+                        Console.WriteLine("Got an unexpected view, continuing searching for border view..");
+                        break;
+                    }
                 }
 
-                Console.WriteLine(sb);
+                if (patternMatches)
+                    break;
             }
-
-            await ws.FinishGameAsync();
+            Console.WriteLine("Column repeated, estimated height most likely is correct.");
+            Console.WriteLine("Estimated height: " + height);
         }
 
         private static async Task MoveAndUpdate(WordSearcher ws, Direction dir, bool[,] map)
@@ -70,6 +134,23 @@ namespace Shpora.WordSearcher
                 if (realX >= 0 && realY >= 0 && realX < map.GetLength(0) && realY < map.GetLength(1))
                     map[realX, realY] = ws.CurrentView[x, y];
             }
+        }
+
+        private static async Task MakeHorizontalCircle(WordSearcher ws)
+        {
+            var foundSomething = await MoveUntilSeeAnything(ws, Right, 50);
+        }
+
+        private static async Task<bool> MoveUntilSeeAnything(WordSearcher ws, Direction direction, int maxMoves = -1)
+        {
+            while (!ws.SeesAnything && maxMoves != 0)
+            {
+                await ws.Move(direction);
+                if (maxMoves > 0)
+                    maxMoves--;
+            }
+
+            return ws.SeesAnything;
         }
 
         private static (string server, string token) ParseArgs(string[] args)
