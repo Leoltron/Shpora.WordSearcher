@@ -21,9 +21,9 @@ namespace Shpora.WordSearcher
             return false;
         }
 
-        public static ulong CustomHashCode(this bool[,] array)
+        public static long CustomHashCode(this bool[,] array)
         {
-            ulong hash = 0L;
+            var hash = 0L;
             unchecked
             {
                 for (var i = 0; i < array.GetLength(0); i++)
@@ -31,6 +31,28 @@ namespace Shpora.WordSearcher
                 {
                     hash = hash << 1;
                     if (array[i, j])
+                        hash |= 1;
+                }
+            }
+
+            return hash;
+        }
+
+        public static long CustomFragmentHashCode(this bool[,] array, int startX, int startY, int fragmentWidth, int fragmentHeight)
+        {
+            var hash = 0L;
+            var width = array.GetLength(0);
+            var height = array.GetLength(1);
+
+            unchecked
+            {
+                for (var x = 0; x < fragmentWidth; x++)
+                for (var y = 0; y < fragmentHeight; y++)
+                {
+                    var actualX = (startX + x) % width;
+                    var actualY = (startY + y) % height;
+                    hash = hash << 1;
+                    if (array[actualX, actualY])
                         hash |= 1;
                 }
             }

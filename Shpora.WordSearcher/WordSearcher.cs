@@ -40,6 +40,11 @@ namespace Shpora.WordSearcher
         private void ResetStats()
         {
             Points = 0;
+            ResetCoords();
+        }
+
+        public void ResetCoords()
+        {
             X = 0;
             Y = 0;
         }
