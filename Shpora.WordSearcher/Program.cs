@@ -115,16 +115,6 @@ namespace Shpora.WordSearcher
 
             Console.WriteLine("Scanning map...");
             var map = await ScanMap(ws, width, height);
-            for (var y = 0; y < height; y++)
-            {
-                for (var x = 0; x < width; x++)
-                {
-                    Console.Write(map[x, y] ? "#" : "_");
-                }
-
-                Console.WriteLine();
-            }
-
             var letters = FindLetters(map);
             var coordsToLetters = letters.ToDictionary(l => (l.x, l.y), l => l.c);
             var words = new List<string>();
@@ -134,12 +124,13 @@ namespace Shpora.WordSearcher
                 var (x, y) = coordsToLetters.Keys.First();
                 while (coordsToLetters.ContainsKey((((x - 7 - 1) + width) % width, y)))
                     x = (x - 7 - 1 + width) % width;
-                for (; coordsToLetters.ContainsKey((x,y)); x=(x+7+1)%width)
+                for (; coordsToLetters.ContainsKey((x, y)); x = (x + 7 + 1) % width)
                 {
-                    wordBuilder.Append(coordsToLetters[(x,y)]);
+                    wordBuilder.Append(coordsToLetters[(x, y)]);
                     coordsToLetters.Remove((x, y));
                 }
-                Console.WriteLine("Found word "+wordBuilder);
+
+                Console.WriteLine("Found word " + wordBuilder);
                 words.Add(wordBuilder.ToString());
             }
 
@@ -148,6 +139,8 @@ namespace Shpora.WordSearcher
 
         private static List<(int x, int y, char c)> FindLetters(bool[,] map)
         {
+            Console.WriteLine("Looking for letters...");
+            var lettersFound = 0;
             var width = map.GetLength(0);
             var height = map.GetLength(1);
             var letters = new List<(int x, int y, char c)>();
@@ -156,8 +149,15 @@ namespace Shpora.WordSearcher
             {
                 var fragmentHash = map.CustomFragmentHashCode(x, y, 7, 7);
                 if (Letters.AlphabetViews.TryGetValue(fragmentHash, out var letter))
+                {
                     letters.Add((x, y, letter));
+                    lettersFound++;
+                    Console.Write("\rLetters found: " + lettersFound);
+                }
             }
+
+            if (lettersFound != 0)
+                Console.WriteLine();
 
             return letters;
         }
