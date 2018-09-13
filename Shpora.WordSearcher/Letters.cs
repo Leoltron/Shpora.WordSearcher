@@ -8,41 +8,41 @@ namespace Shpora.WordSearcher
         private static readonly string[] Alphabet =
             {А, Б, В, Г, Д, Е, Ё, Ж, З, И, Й, К, Л, М, Н, О, П, Р, С, Т, У, Ф, Х, Ц, Ч, Ш, Щ, Ъ, Ы, Ь, Э, Ю, Я};
 
-        public static Dictionary<long, char> AlphabetViews = new Dictionary<long, char>
+        public static readonly Dictionary<long, char> AlphabetViews = new Dictionary<long, char>
         {
-            [LetterLayoutToViewHash(А)] = 'А',
-            [LetterLayoutToViewHash(Б)] = 'Б',
-            [LetterLayoutToViewHash(В)] = 'В',
-            [LetterLayoutToViewHash(Г)] = 'Г',
-            [LetterLayoutToViewHash(Д)] = 'Д',
-            [LetterLayoutToViewHash(Е)] = 'Е',
-            [LetterLayoutToViewHash(Ё)] = 'Ё',
-            [LetterLayoutToViewHash(Ж)] = 'Ж',
-            [LetterLayoutToViewHash(З)] = 'З',
-            [LetterLayoutToViewHash(И)] = 'И',
-            [LetterLayoutToViewHash(Й)] = 'Й',
-            [LetterLayoutToViewHash(К)] = 'К',
-            [LetterLayoutToViewHash(Л)] = 'Л',
-            [LetterLayoutToViewHash(М)] = 'М',
-            [LetterLayoutToViewHash(Н)] = 'Н',
-            [LetterLayoutToViewHash(О)] = 'О',
-            [LetterLayoutToViewHash(П)] = 'П',
-            [LetterLayoutToViewHash(Р)] = 'Р',
-            [LetterLayoutToViewHash(С)] = 'С',
-            [LetterLayoutToViewHash(Т)] = 'Т',
-            [LetterLayoutToViewHash(У)] = 'У',
-            [LetterLayoutToViewHash(Ф)] = 'Ф',
-            [LetterLayoutToViewHash(Х)] = 'Х',
-            [LetterLayoutToViewHash(Ц)] = 'Ц',
-            [LetterLayoutToViewHash(Ч)] = 'Ч',
-            [LetterLayoutToViewHash(Ш)] = 'Ш',
-            [LetterLayoutToViewHash(Щ)] = 'Щ',
-            [LetterLayoutToViewHash(Ъ)] = 'Ъ',
-            [LetterLayoutToViewHash(Ы)] = 'Ы',
-            [LetterLayoutToViewHash(Ь)] = 'Ь',
-            [LetterLayoutToViewHash(Э)] = 'Э',
-            [LetterLayoutToViewHash(Ю)] = 'Ю',
-            [LetterLayoutToViewHash(Я)] = 'Я'
+            [LetterLayoutToViewHash(А)] = 'а',
+            [LetterLayoutToViewHash(Б)] = 'б',
+            [LetterLayoutToViewHash(В)] = 'в',
+            [LetterLayoutToViewHash(Г)] = 'г',
+            [LetterLayoutToViewHash(Д)] = 'д',
+            [LetterLayoutToViewHash(Е)] = 'е',
+            [LetterLayoutToViewHash(Ё)] = 'ё',
+            [LetterLayoutToViewHash(Ж)] = 'ж',
+            [LetterLayoutToViewHash(З)] = 'з',
+            [LetterLayoutToViewHash(И)] = 'и',
+            [LetterLayoutToViewHash(Й)] = 'й',
+            [LetterLayoutToViewHash(К)] = 'к',
+            [LetterLayoutToViewHash(Л)] = 'л',
+            [LetterLayoutToViewHash(М)] = 'м',
+            [LetterLayoutToViewHash(Н)] = 'н',
+            [LetterLayoutToViewHash(О)] = 'о',
+            [LetterLayoutToViewHash(П)] = 'п',
+            [LetterLayoutToViewHash(Р)] = 'р',
+            [LetterLayoutToViewHash(С)] = 'с',
+            [LetterLayoutToViewHash(Т)] = 'т',
+            [LetterLayoutToViewHash(У)] = 'у',
+            [LetterLayoutToViewHash(Ф)] = 'ф',
+            [LetterLayoutToViewHash(Х)] = 'х',
+            [LetterLayoutToViewHash(Ц)] = 'ц',
+            [LetterLayoutToViewHash(Ч)] = 'ч',
+            [LetterLayoutToViewHash(Ш)] = 'ш',
+            [LetterLayoutToViewHash(Щ)] = 'щ',
+            [LetterLayoutToViewHash(Ъ)] = 'ъ',
+            [LetterLayoutToViewHash(Ы)] = 'ы',
+            [LetterLayoutToViewHash(Ь)] = 'ь',
+            [LetterLayoutToViewHash(Э)] = 'э',
+            [LetterLayoutToViewHash(Ю)] = 'ю',
+            [LetterLayoutToViewHash(Я)] = 'я'
         };
 
         private static long LetterLayoutToViewHash(string layout)
@@ -73,7 +73,7 @@ namespace Shpora.WordSearcher
 
         private const string Б = "#######\n" +
                                  "#      \n" +
-                                 "Г     \n" +
+                                 "#      \n" +
                                  "#######\n" +
                                  "#     #\n" +
                                  "#     #\n" +

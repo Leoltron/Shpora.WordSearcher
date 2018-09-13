@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Shpora.WordSearcher
 {
@@ -104,6 +106,17 @@ namespace Shpora.WordSearcher
             }
 
             return field;
+        }
+
+        public async Task<int> SubmitWords(params string[] words)
+        {
+            var wordsJson = JsonConvert.SerializeObject(words);
+            var content = new StringContent(wordsJson, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("/task/words/", content);
+            var pointsInDict = await response.DeserializeContent<Dictionary<string, int>>();
+            var pointsReceived = pointsInDict["points"];
+            Console.WriteLine($"Received {pointsReceived} for " + wordsJson);
+            return pointsReceived;
         }
 
         public async Task FinishGameAsync()

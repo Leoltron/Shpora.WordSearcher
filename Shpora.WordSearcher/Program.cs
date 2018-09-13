@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using static Shpora.WordSearcher.Direction;
 
@@ -16,7 +18,7 @@ namespace Shpora.WordSearcher
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", token);
 
             var ws = new WordSearcher(client);
-            await ws.InitGameAsync(true);
+            await ws.InitGameAsync();
             try
             {
                 await WsMain(ws);
@@ -122,6 +124,42 @@ namespace Shpora.WordSearcher
 
                 Console.WriteLine();
             }
+
+            var letters = FindLetters(map);
+            var coordsToLetters = letters.ToDictionary(l => (l.x, l.y), l => l.c);
+            var words = new List<string>();
+            while (coordsToLetters.Count > 0)
+            {
+                var wordBuilder = new StringBuilder();
+                var (x, y) = coordsToLetters.Keys.First();
+                while (coordsToLetters.ContainsKey((((x - 7 - 1) + width) % width, y)))
+                    x = (x - 7 - 1 + width) % width;
+                for (; coordsToLetters.ContainsKey((x,y)); x=(x+7+1)%width)
+                {
+                    wordBuilder.Append(coordsToLetters[(x,y)]);
+                    coordsToLetters.Remove((x, y));
+                }
+                Console.WriteLine("Found word "+wordBuilder);
+                words.Add(wordBuilder.ToString());
+            }
+
+            await ws.SubmitWords(words.ToArray());
+        }
+
+        private static List<(int x, int y, char c)> FindLetters(bool[,] map)
+        {
+            var width = map.GetLength(0);
+            var height = map.GetLength(1);
+            var letters = new List<(int x, int y, char c)>();
+            for (var x = 0; x < width; x++)
+            for (var y = 0; y < height; y++)
+            {
+                var fragmentHash = map.CustomFragmentHashCode(x, y, 7, 7);
+                if (Letters.AlphabetViews.TryGetValue(fragmentHash, out var letter))
+                    letters.Add((x, y, letter));
+            }
+
+            return letters;
         }
 
         private static async Task<bool[,]> ScanMap(WordSearcher ws, int width, int height)
@@ -131,6 +169,7 @@ namespace Shpora.WordSearcher
             ws.ResetCoords();
             var linesRemain = height;
             UpdateMap();
+            Console.Write("Scan progress: 0%");
             while (true)
             {
                 for (var i = 0; i < width - Constants.VisibleFieldWidth; i++)
@@ -145,7 +184,10 @@ namespace Shpora.WordSearcher
                 if (linesRemain <= 0) break;
                 await ws.Move(Down, Math.Min(linesRemain, Constants.VisibleFieldHeight));
                 UpdateMap();
+                Console.Write($"\rScan progress: {(int) (100 - (float) linesRemain / height * 100)}%");
             }
+
+            Console.WriteLine("\rScan progress: 100%");
 
             return map;
         }
