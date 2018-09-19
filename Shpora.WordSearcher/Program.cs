@@ -18,7 +18,7 @@ namespace Shpora.WordSearcher
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", token);
 
             var ws = new WordSearcher(client);
-            await ws.InitGameAsync();
+            await ws.InitGameAsync(false);
             try
             {
                 await WsMain(ws);
@@ -134,7 +134,19 @@ namespace Shpora.WordSearcher
                 words.Add(wordBuilder.ToString());
             }
 
-            await ws.SubmitWords(words.ToArray());
+            await ws.UpdateStatsAsync();
+            var pointsLost = -ws.Points;
+
+            foreach (var word in words.OrderBy(w => w.Length))
+            {
+                await ws.SubmitWords(word);
+            }
+            await ws.UpdateStatsAsync();
+
+            Console.WriteLine("Moves: " + ws.Moves);
+            Console.WriteLine("Points lost by walking: " + pointsLost);
+            Console.WriteLine("Total words: " + ws.Words);
+            Console.WriteLine("Got from word submitting: " + (ws.Points + pointsLost));
         }
 
         private static List<(int x, int y, char c)> FindLetters(bool[,] map)
