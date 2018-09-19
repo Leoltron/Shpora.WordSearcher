@@ -23,10 +23,17 @@ namespace Shpora.WordSearcher
             {
                 await WsMain(ws);
             }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+            }
             finally
             {
-                await ws.FinishGameAsync();
-                Console.WriteLine("Session finished. Total points: " + ws.Points);
+                if (ws.SessionInProgress)
+                {
+                    await ws.FinishGameAsync();
+                    Logger.Info("Session finished. Total points: " + ws.Points);
+                }
             }
         }
 
@@ -34,8 +41,8 @@ namespace Shpora.WordSearcher
         {
             await FindNonEmptyView(ws);
 
-            Console.WriteLine("Estimating width...");
-            Console.WriteLine("Going right until find border view again...");
+            Logger.Info("Estimating width...");
+            Logger.Info("Going right until find border view again...");
             var borderView = new bool[Constants.VisibleFieldWidth, Constants.VisibleFieldHeight];
             Array.Copy(ws.CurrentView, borderView, ws.CurrentView.Length);
 
@@ -50,8 +57,7 @@ namespace Shpora.WordSearcher
                     width++;
                 } while (!ws.CurrentView.ArrayEquals(borderView));
 
-                Console.WriteLine(
-                    "Border view found again, going right further to check that line is repeating itself...");
+                Logger.Info("Border view found again, going right further to check that line is repeating itself...");
 
                 var checkViewHashes = new List<long>(width);
                 var patternMatches = true;
@@ -63,7 +69,7 @@ namespace Shpora.WordSearcher
                     {
                         patternMatches = false;
                         viewHashes.AddRange(checkViewHashes);
-                        Console.WriteLine("Got an unexpected view, continuing searching for border view..");
+                        Logger.Info("Got an unexpected view, continuing searching for border view..");
                         break;
                     }
                 }
@@ -72,11 +78,11 @@ namespace Shpora.WordSearcher
                     break;
             }
 
-            Console.WriteLine("Line repeated, estimated width most likely is correct.");
-            Console.WriteLine("Estimated width: " + width);
+            Logger.Info("Line repeated, estimated width most likely is correct.");
+            Logger.Info("Estimated width: " + width);
 
-            Console.WriteLine("Estimating height...");
-            Console.WriteLine("Going down until find border view again...");
+            Logger.Info("Estimating height...");
+            Logger.Info("Going down until find border view again...");
             viewHashes.Clear();
             var height = 0;
             while (true)
@@ -88,7 +94,7 @@ namespace Shpora.WordSearcher
                     height++;
                 } while (!ws.CurrentView.ArrayEquals(borderView));
 
-                Console.WriteLine(
+                Logger.Info(
                     "Border view found again, going down further to check that column is repeating itself...");
 
                 var checkViewHashes = new List<long>(height);
@@ -101,7 +107,7 @@ namespace Shpora.WordSearcher
                     {
                         patternMatches = false;
                         viewHashes.AddRange(checkViewHashes);
-                        Console.WriteLine("Got an unexpected view, continuing searching for border view..");
+                        Logger.Info("Got an unexpected view, continuing searching for border view..");
                         break;
                     }
                 }
@@ -110,10 +116,10 @@ namespace Shpora.WordSearcher
                     break;
             }
 
-            Console.WriteLine("Column repeated, estimated height most likely is correct.");
-            Console.WriteLine("Estimated height: " + height);
+            Logger.Info("Column repeated, estimated height most likely is correct.");
+            Logger.Info("Estimated height: " + height);
 
-            Console.WriteLine("Scanning map...");
+            Logger.Info("Scanning map...");
             var map = await ScanMap(ws, width, height);
             var letters = FindLetters(map);
             var coordsToLetters = letters.ToDictionary(l => (l.x, l.y), l => l.c);
@@ -130,9 +136,13 @@ namespace Shpora.WordSearcher
                     coordsToLetters.Remove((x, y));
                 }
 
-                Console.WriteLine("Found word " + wordBuilder);
                 words.Add(wordBuilder.ToString());
             }
+
+            if (words.Any())
+                Logger.Info("Found words: " + string.Join(",", words));
+            else
+                Logger.Warn("Found no words");
 
             await ws.UpdateStatsAsync();
             var pointsLost = -ws.Points;
@@ -141,17 +151,18 @@ namespace Shpora.WordSearcher
             {
                 await ws.SubmitWords(word);
             }
+
             await ws.UpdateStatsAsync();
 
-            Console.WriteLine("Moves: " + ws.Moves);
-            Console.WriteLine("Points lost by walking: " + pointsLost);
-            Console.WriteLine("Total words: " + ws.Words);
-            Console.WriteLine("Got from word submitting: " + (ws.Points + pointsLost));
+            Logger.Info("Moves: " + ws.Moves);
+            Logger.Info("Points lost by walking: " + pointsLost);
+            Logger.Info("Total words: " + ws.Words);
+            Logger.Info("Got from word submitting: " + (ws.Points + pointsLost));
         }
 
         private static List<(int x, int y, char c)> FindLetters(bool[,] map)
         {
-            Console.WriteLine("Looking for letters...");
+            Logger.Info("Looking for letters...");
             var lettersFound = 0;
             var width = map.GetLength(0);
             var height = map.GetLength(1);
@@ -164,12 +175,10 @@ namespace Shpora.WordSearcher
                 {
                     letters.Add((x, y, letter));
                     lettersFound++;
-                    Console.Write("\rLetters found: " + lettersFound);
                 }
             }
 
-            if (lettersFound != 0)
-                Console.WriteLine();
+            Logger.Info("Letters found: " + lettersFound);
 
             return letters;
         }
@@ -181,7 +190,7 @@ namespace Shpora.WordSearcher
             ws.ResetCoords();
             var linesRemain = height;
             UpdateMap();
-            Console.Write("Scan progress: 0%");
+            Logger.Debug("Scan progress: 0%");
             while (true)
             {
                 for (var i = 0; i < width - Constants.VisibleFieldWidth; i++)
@@ -196,10 +205,10 @@ namespace Shpora.WordSearcher
                 if (linesRemain <= 0) break;
                 await ws.Move(Down, Math.Min(linesRemain, Constants.VisibleFieldHeight));
                 UpdateMap();
-                Console.Write($"\rScan progress: {(int) (100 - (float) linesRemain / height * 100)}%");
+                Logger.Debug($"Scan progress: {(int) (100 - (float) linesRemain / height * 100)}%");
             }
 
-            Console.WriteLine("\rScan progress: 100%");
+            Logger.Debug("Scan progress: 100%");
 
             return map;
         }
@@ -221,7 +230,7 @@ namespace Shpora.WordSearcher
 
         private static async Task FindNonEmptyView(WordSearcher ws)
         {
-            Console.WriteLine("Looking for non-empty view for width and height estimation...");
+            Logger.Info("Looking for non-empty view for width and height estimation...");
             var linesChecked = 0;
             while (true)
             {
@@ -231,13 +240,13 @@ namespace Shpora.WordSearcher
                 if (foundSomething)
                     break;
 
-                Console.WriteLine(
+                Logger.Info(
                     $"Found nothing in range {searchRange} on line, going {Constants.VisibleFieldHeight} lower... (current Y:{ws.Y})");
                 linesChecked++;
                 await ws.Move(Down, Constants.VisibleFieldHeight);
             }
 
-            Console.WriteLine("Non-empty view found.");
+            Logger.Info("Non-empty view found.");
         }
 
         private static async Task<bool> MoveUntilSeeAnything(WordSearcher ws, Direction direction, int maxMoves = -1)

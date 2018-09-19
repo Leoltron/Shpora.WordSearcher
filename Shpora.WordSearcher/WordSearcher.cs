@@ -11,7 +11,8 @@ namespace Shpora.WordSearcher
     public class WordSearcher
     {
         private readonly HttpClient client;
-        private static readonly bool[,] emptyField = new bool[0, 0];
+        private static readonly bool[,] EmptyField = new bool[0, 0];
+        public bool SessionInProgress { get; private set; }
         public int Points { get; private set; }
         public int Words { get; private set; }
         public int Moves { get; private set; }
@@ -34,6 +35,7 @@ namespace Shpora.WordSearcher
 
             var response = await client.PostAsync(request, null);
             response.EnsureSuccessStatusCode();
+            SessionInProgress = true;
             //var secondsTimeout = long.Parse(response.Headers.GetValues("Expires").First());
             //var sessionInitDate = DateTime.Parse(string.Join(" ", response.Headers.GetValues("Last-Modified")));
             ResetStats();
@@ -62,7 +64,7 @@ namespace Shpora.WordSearcher
 
         public async Task Move(Direction direction, int amount, bool updateView = true)
         {
-            //Console.WriteLine($"Before move X:{X} Y:{Y}");
+            //Logger.Info($"Before move X:{X} Y:{Y}");
             if (amount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(amount), amount, "Value must be positive");
             var request = $"/task/move/{direction}";
@@ -73,19 +75,19 @@ namespace Shpora.WordSearcher
                 response.EnsureSuccessStatusCode();
             }
 
-            CurrentView = updateView ? ReadField(await response.Content.ReadAsStringAsync()) : emptyField;
+            CurrentView = updateView ? ReadField(await response.Content.ReadAsStringAsync()) : EmptyField;
             var (dx, dy) = direction.ToCoordsChange();
             X += dx * amount;
             Y += dy * amount;
-            //Console.WriteLine($"After move X:{X} Y:{Y}");
+            //Logger.Info($"After move X:{X} Y:{Y}");
         }
 
         public async Task Move(Direction direction, bool updateView = true)
         {
-            //Console.WriteLine($"X:{X} Y:{Y}");
+            //Logger.Info($"X:{X} Y:{Y}");
             var response = await client.PostAsync($"/task/move/{direction}", null);
             response.EnsureSuccessStatusCode();
-            CurrentView = updateView ? ReadField(await response.Content.ReadAsStringAsync()) : emptyField;
+            CurrentView = updateView ? ReadField(await response.Content.ReadAsStringAsync()) : EmptyField;
             var (dx, dy) = direction.ToCoordsChange();
             X += dx;
             Y += dy;
@@ -94,9 +96,9 @@ namespace Shpora.WordSearcher
         private static bool[,] ReadField(string fieldString)
         {
             if (string.IsNullOrWhiteSpace(fieldString))
-                return emptyField;
-            //Console.WriteLine(fieldString);
-            //Console.WriteLine();
+                return EmptyField;
+            //Logger.Info(fieldString);
+            //Logger.Info();
             var rows = fieldString.Split(new[] {"\r\n"}, StringSplitOptions.None);
             var field = new bool[rows.First().Length, rows.Length];
             for (var x = 0; x < field.GetLength(0); x++)
@@ -115,7 +117,7 @@ namespace Shpora.WordSearcher
             var response = await client.PostAsync("/task/words/", content);
             var pointsInDict = await response.DeserializeContent<Dictionary<string, int>>();
             var pointsReceived = pointsInDict["points"];
-            Console.WriteLine($"Received {pointsReceived} for " + wordsJson);
+            Logger.Info($"Received {pointsReceived} for " + wordsJson);
             return pointsReceived;
         }
 
@@ -123,6 +125,7 @@ namespace Shpora.WordSearcher
         {
             var response = await client.PostAsync("/task/game/finish", null);
             response.EnsureSuccessStatusCode();
+            SessionInProgress = false;
             Points = (await response.DeserializeContent<Dictionary<string, int>>())["points"];
         }
     }

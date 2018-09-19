@@ -53,6 +53,8 @@
     <Compile Include="DirectionExtensions.cs" />
     <Compile Include="HttpResponseMessageExtensions.cs" />
     <Compile Include="Letters.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="LogLevelExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WordSearcher.cs" />
