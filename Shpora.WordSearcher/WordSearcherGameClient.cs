@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Shpora.WordSearcher
 {
-    public class WordSearcherClient
+    public class WordSearcherGameClient
     {
         private static readonly bool[,] EmptyField = new bool[0, 0];
         private readonly HttpClient client;
@@ -29,9 +30,14 @@ namespace Shpora.WordSearcher
 
         public bool SeesAnything => CurrentView?.Any(b => b) ?? false;
 
-        public WordSearcherClient(HttpClient client)
+        public WordSearcherGameClient(string serverUrl, string token)
         {
-            this.client = client ?? throw new ArgumentNullException(nameof(client));
+            if (string.IsNullOrWhiteSpace(serverUrl))
+                throw new ArgumentException("Server url cannot be empty", nameof(serverUrl));
+
+            client = new HttpClient {BaseAddress = new Uri(serverUrl)};
+            if (!string.IsNullOrWhiteSpace(token))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", token);
         }
 
         public async Task InitGameAsync(bool test = false)
@@ -133,6 +139,17 @@ namespace Shpora.WordSearcher
             response.EnsureSuccessStatusCode();
             SessionInProgress = false;
             Points = (await response.DeserializeContent<Dictionary<string, int>>())["points"];
+        }
+
+        public void LogStats()
+        {
+            Logger.Info(string.Join(Environment.NewLine + "\t",
+                "Session finished. Results:",
+                "Points: " + Points,
+                "Moves: " + Moves,
+                "Points from words: " + (Points + Moves),
+                "Words submitted: " + Words
+            ));
         }
     }
 }

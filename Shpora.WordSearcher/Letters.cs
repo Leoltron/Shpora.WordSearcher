@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Shpora.WordSearcher
 {
     public static class Letters
     {
-        private static readonly string[] Alphabet =
-            {А, Б, В, Г, Д, Е, Ё, Ж, З, И, Й, К, Л, М, Н, О, П, Р, С, Т, У, Ф, Х, Ц, Ч, Ш, Щ, Ъ, Ы, Ь, Э, Ю, Я};
-
         public static readonly Dictionary<long, char> AlphabetViews = new Dictionary<long, char>
         {
             [LetterLayoutToViewHash(А)] = 'а',

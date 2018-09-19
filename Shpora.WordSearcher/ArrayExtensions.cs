@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Shpora.WordSearcher
 {
     public static class ArrayExtensions
     {
-        public static IEnumerable<T> ToEnumerable<T>(this T[,] array)
-        {
-            for (var i = 0; i < array.GetLength(0); i++)
-            for (var j = 0; j < array.GetLength(1); j++)
-                yield return array[i, j];
-        }
-
         public static bool Any<T>(this T[,] array, Func<T, bool> predicate)
         {
             for (var i = 0; i < array.GetLength(0); i++)
@@ -38,7 +30,12 @@ namespace Shpora.WordSearcher
             return hash;
         }
 
-        public static long CustomFragmentHashCode(this bool[,] array, int startX, int startY, int fragmentWidth, int fragmentHeight)
+        public static long CustomFragmentHashCode(
+            this bool[,] array,
+            int startX,
+            int startY,
+            int fragmentWidth,
+            int fragmentHeight)
         {
             var hash = 0L;
             var width = array.GetLength(0);
@@ -75,6 +72,7 @@ namespace Shpora.WordSearcher
                 if (array[i, j] != other[i, j])
                     return false;
             }
+
             return true;
         }
     }
