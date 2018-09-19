@@ -17,8 +17,8 @@ namespace Shpora.WordSearcher
             var client = new HttpClient {BaseAddress = new Uri(server)};
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", token);
 
-            var ws = new WordSearcher(client);
-            await ws.InitGameAsync(false);
+            var ws = new WordSearcherClient(client);
+            await ws.InitGameAsync();
             try
             {
                 await WsMain(ws);
@@ -37,7 +37,7 @@ namespace Shpora.WordSearcher
             }
         }
 
-        private static async Task WsMain(WordSearcher ws)
+        private static async Task WsMain(WordSearcherClient ws)
         {
             await FindNonEmptyView(ws);
 
@@ -183,7 +183,7 @@ namespace Shpora.WordSearcher
             return letters;
         }
 
-        private static async Task<bool[,]> ScanMap(WordSearcher ws, int width, int height)
+        private static async Task<bool[,]> ScanMap(WordSearcherClient ws, int width, int height)
         {
             var map = new bool[width, height];
             void UpdateMap() => CopyMap(ws.CurrentView, map, ws.X, ws.Y);
@@ -228,7 +228,7 @@ namespace Shpora.WordSearcher
             }
         }
 
-        private static async Task FindNonEmptyView(WordSearcher ws)
+        private static async Task FindNonEmptyView(WordSearcherClient ws)
         {
             Logger.Info("Looking for non-empty view for width and height estimation...");
             var linesChecked = 0;
@@ -249,7 +249,7 @@ namespace Shpora.WordSearcher
             Logger.Info("Non-empty view found.");
         }
 
-        private static async Task<bool> MoveUntilSeeAnything(WordSearcher ws, Direction direction, int maxMoves = -1)
+        private static async Task<bool> MoveUntilSeeAnything(WordSearcherClient ws, Direction direction, int maxMoves = -1)
         {
             while (!ws.SeesAnything && maxMoves != 0)
             {
