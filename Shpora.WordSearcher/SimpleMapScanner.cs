@@ -5,29 +5,29 @@ namespace Shpora.WordSearcher
 {
     public class SimpleMapScanner
     {
-        protected readonly WordSearcherGameClient WsGameClient;
-        protected readonly int MapWidth;
-        protected readonly int MapHeight;
+        private readonly WordSearcherGameClient wsGameClient;
+        private readonly int mapWidth;
+        private readonly int mapHeight;
 
         public SimpleMapScanner(WordSearcherGameClient wsGameClient, int mapWidth, int mapHeight)
         {
-            WsGameClient = wsGameClient;
-            MapWidth = mapWidth;
-            MapHeight = mapHeight;
+            this.wsGameClient = wsGameClient;
+            this.mapWidth = mapWidth;
+            this.mapHeight = mapHeight;
         }
 
-        public virtual async Task<bool[,]> ScanMapAsync()
+        public async Task<bool[,]> ScanMapAsync()
         {
-            var mapWriter = new MapWriter(WsGameClient, MapWidth, MapHeight);
+            var mapWriter = new MapWriter(wsGameClient, mapWidth, mapHeight);
 
-            var linesRemain = MapHeight;
+            var linesRemain = mapHeight;
             mapWriter.UpdateMap();
             Logger.Debug("Scan progress: 0%");
             while (true)
             {
-                for (var i = 0; i < MapWidth - Constants.VisibleFieldWidth; i++)
+                for (var i = 0; i < mapWidth - Constants.VisibleFieldWidth; i++)
                 {
-                    await WsGameClient.MoveAsync(Direction.Right);
+                    await wsGameClient.MoveAsync(Direction.Right);
                     if (i % Constants.VisibleFieldWidth == 0)
                         mapWriter.UpdateMap();
                 }
@@ -35,9 +35,9 @@ namespace Shpora.WordSearcher
                 mapWriter.UpdateMap();
                 linesRemain -= Constants.VisibleFieldHeight;
                 if (linesRemain <= 0) break;
-                await WsGameClient.MoveAsync(Direction.Down, Math.Min(linesRemain, Constants.VisibleFieldHeight));
+                await wsGameClient.MoveAsync(Direction.Down, Math.Min(linesRemain, Constants.VisibleFieldHeight));
                 mapWriter.UpdateMap();
-                Logger.Debug($"Scan progress: {(int) (100 - (float) linesRemain / MapHeight * 100)}%");
+                Logger.Debug($"Scan progress: {(int) (100 - (float) linesRemain / mapHeight * 100)}%");
             }
 
             Logger.Debug("Scan progress: 100%");

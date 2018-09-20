@@ -47,7 +47,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AdvancedMapScanner.cs" />
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Direction.cs" />
