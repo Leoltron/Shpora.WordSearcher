@@ -57,6 +57,7 @@
     <Compile Include="Logger.cs" />
     <Compile Include="LogLevelExtensions.cs" />
     <Compile Include="MapDimensionsEstimator.cs" />
+    <Compile Include="MapWriter.cs" />
     <Compile Include="SimpleMapScanner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

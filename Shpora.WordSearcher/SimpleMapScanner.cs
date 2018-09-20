@@ -1,70 +1,48 @@
 ﻿using System;
 using System.Threading.Tasks;
-using static Shpora.WordSearcher.Direction;
 
 namespace Shpora.WordSearcher
 {
     public class SimpleMapScanner
     {
-        protected readonly WordSearcherGameClient wsGameClient;
-        protected readonly int mapWidth;
-        protected readonly int mapHeight;
+        protected readonly WordSearcherGameClient WsGameClient;
+        protected readonly int MapWidth;
+        protected readonly int MapHeight;
 
         public SimpleMapScanner(WordSearcherGameClient wsGameClient, int mapWidth, int mapHeight)
         {
-            this.wsGameClient = wsGameClient;
-            this.mapWidth = mapWidth;
-            this.mapHeight = mapHeight;
+            WsGameClient = wsGameClient;
+            MapWidth = mapWidth;
+            MapHeight = mapHeight;
         }
 
         public virtual async Task<bool[,]> ScanMapAsync()
         {
-            var map = new bool[mapWidth, mapHeight];
-            void UpdateMap() => CopyMapFromWsClient(map);
+            var mapWriter = new MapWriter(WsGameClient, MapWidth, MapHeight);
 
-            var linesRemain = mapHeight;
-            UpdateMap();
+            var linesRemain = MapHeight;
+            mapWriter.UpdateMap();
             Logger.Debug("Scan progress: 0%");
             while (true)
             {
-                for (var i = 0; i < mapWidth - Constants.VisibleFieldWidth; i++)
+                for (var i = 0; i < MapWidth - Constants.VisibleFieldWidth; i++)
                 {
-                    await wsGameClient.MoveAsync(Right);
+                    await WsGameClient.MoveAsync(Direction.Right);
                     if (i % Constants.VisibleFieldWidth == 0)
-                        UpdateMap();
+                        mapWriter.UpdateMap();
                 }
 
-                UpdateMap();
+                mapWriter.UpdateMap();
                 linesRemain -= Constants.VisibleFieldHeight;
                 if (linesRemain <= 0) break;
-                await wsGameClient.MoveAsync(Down, Math.Min(linesRemain, Constants.VisibleFieldHeight));
-                UpdateMap();
-                Logger.Debug($"Scan progress: {(int) (100 - (float) linesRemain / mapHeight * 100)}%");
+                await WsGameClient.MoveAsync(Direction.Down, Math.Min(linesRemain, Constants.VisibleFieldHeight));
+                mapWriter.UpdateMap();
+                Logger.Debug($"Scan progress: {(int) (100 - (float) linesRemain / MapHeight * 100)}%");
             }
 
             Logger.Debug("Scan progress: 100%");
 
-            return map;
-        }
-
-        protected void CopyMapFromWsClient(bool[,] to)
-        {
-            CopyMap(wsGameClient.CurrentView, to, wsGameClient.X, wsGameClient.Y);
-        }
-
-        private static void CopyMap(bool[,] from, bool[,] to, int offsetX, int offsetY)
-        {
-            var fromWidth = from.GetLength(0);
-            var fromHeight = from.GetLength(1);
-            var toWidth = to.GetLength(0);
-            var toHeight = to.GetLength(1);
-            for (var x = 0; x < fromWidth; x++)
-            for (var y = 0; y < fromHeight; y++)
-            {
-                var toX = (x + offsetX) % toWidth;
-                var toY = (y + offsetY) % toHeight;
-                to[toX, toY] = from[x, y];
-            }
+            return mapWriter.Map;
         }
     }
 }
