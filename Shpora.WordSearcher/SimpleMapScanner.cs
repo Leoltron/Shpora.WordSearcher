@@ -17,11 +17,11 @@ namespace Shpora.WordSearcher
             this.mapHeight = mapHeight;
         }
 
-        public virtual async Task<bool[,]> ScanMap()
+        public virtual async Task<bool[,]> ScanMapAsync()
         {
             var map = new bool[mapWidth, mapHeight];
-            void UpdateMap() => CopyMap(wsGameClient.CurrentView, map, wsGameClient.X, wsGameClient.Y);
-            wsGameClient.ResetCoords();
+            void UpdateMap() => CopyMapFromWsClient(map);
+
             var linesRemain = mapHeight;
             UpdateMap();
             Logger.Debug("Scan progress: 0%");
@@ -29,7 +29,7 @@ namespace Shpora.WordSearcher
             {
                 for (var i = 0; i < mapWidth - Constants.VisibleFieldWidth; i++)
                 {
-                    await wsGameClient.Move(Right);
+                    await wsGameClient.MoveAsync(Right);
                     if (i % Constants.VisibleFieldWidth == 0)
                         UpdateMap();
                 }
@@ -37,7 +37,7 @@ namespace Shpora.WordSearcher
                 UpdateMap();
                 linesRemain -= Constants.VisibleFieldHeight;
                 if (linesRemain <= 0) break;
-                await wsGameClient.Move(Down, Math.Min(linesRemain, Constants.VisibleFieldHeight));
+                await wsGameClient.MoveAsync(Down, Math.Min(linesRemain, Constants.VisibleFieldHeight));
                 UpdateMap();
                 Logger.Debug($"Scan progress: {(int) (100 - (float) linesRemain / mapHeight * 100)}%");
             }

@@ -23,7 +23,7 @@ namespace Shpora.WordSearcher
                 var words = await SearchForWords();
                 foreach (var word in words.OrderBy(w => w.Length))
                 {
-                    await wsClient.SubmitWords(word);
+                    await wsClient.SubmitWordsAsync(word);
                 }
             }
             catch (Exception e)
@@ -45,7 +45,7 @@ namespace Shpora.WordSearcher
         {
             var (width, height) = await new MapDimensionsEstimator(wsClient).EstimateDimensions();
             Logger.Info($"Estimated map size: {width}x{height}");
-            var map = await new SimpleMapScanner(wsClient, width, height).ScanMap();
+            var map = await new SimpleMapScanner(wsClient, width, height).ScanMapAsync();
 
             var letters = FindLetters(map);
             var words = TransformToLetters(letters, width);

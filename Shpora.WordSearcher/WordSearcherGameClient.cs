@@ -79,7 +79,7 @@ namespace Shpora.WordSearcher
             Moves = stats["moves"];
         }
 
-        public async Task Move(Direction direction, int amount, bool updateView = true)
+        public async Task MoveAsync(Direction direction, int amount, bool updateView = true)
         {
             if (amount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(amount), amount, "Value must be positive");
@@ -97,7 +97,7 @@ namespace Shpora.WordSearcher
             Y += dy * amount;
         }
 
-        public async Task Move(Direction direction, bool updateView = true)
+        public async Task MoveAsync(Direction direction, bool updateView = true)
         {
             var response = await client.PostAsync($"/task/move/{direction}", null);
             response.EnsureSuccessStatusCode();
@@ -122,7 +122,7 @@ namespace Shpora.WordSearcher
             return field;
         }
 
-        public async Task<int> SubmitWords(params string[] words)
+        public async Task<int> SubmitWordsAsync(params string[] words)
         {
             var wordsJson = JsonConvert.SerializeObject(words);
             var content = new StringContent(wordsJson, Encoding.UTF8, "application/json");

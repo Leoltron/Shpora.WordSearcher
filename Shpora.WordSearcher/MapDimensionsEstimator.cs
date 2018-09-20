@@ -30,7 +30,7 @@ namespace Shpora.WordSearcher
             {
                 do
                 {
-                    await wsGameClient.Move(direction);
+                    await wsGameClient.MoveAsync(direction);
                     viewHashes.Add(wsGameClient.CurrentView.CustomHashCode());
                     length++;
                 } while (!wsGameClient.CurrentView.ArrayEquals(borderView));
@@ -39,7 +39,7 @@ namespace Shpora.WordSearcher
                 var patternMatches = true;
                 for (var i = 0; i < length; i++)
                 {
-                    await wsGameClient.Move(direction);
+                    await wsGameClient.MoveAsync(direction);
                     checkViewHashes.Add(wsGameClient.CurrentView.CustomHashCode());
                     if (checkViewHashes[i] != viewHashes[i])
                     {
@@ -72,7 +72,7 @@ namespace Shpora.WordSearcher
                 Logger.Info(
                     $"Found nothing in range {searchRange} on line, going {Constants.VisibleFieldHeight} lower... (current Y:{wsGameClient.Y})");
                 linesChecked++;
-                await wsGameClient.Move(Direction.Down, Constants.VisibleFieldHeight);
+                await wsGameClient.MoveAsync(Direction.Down, Constants.VisibleFieldHeight);
             }
 
             Logger.Info("Non-empty view found.");
@@ -83,7 +83,7 @@ namespace Shpora.WordSearcher
         {
             while (!wsGameClient.SeesAnything && maxMoves != 0)
             {
-                await wsGameClient.Move(direction);
+                await wsGameClient.MoveAsync(direction);
                 if (maxMoves > 0)
                     maxMoves--;
             }
