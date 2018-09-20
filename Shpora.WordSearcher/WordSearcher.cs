@@ -17,13 +17,13 @@ namespace Shpora.WordSearcher
 
         public async Task PlaySessionAsync()
         {
-            await wsClient.InitGameAsync();
             try
             {
+                await wsClient.InitGameAsync();
                 var words = await SearchForWords();
                 foreach (var word in words.OrderBy(w => w.Length))
                 {
-                    await wsClient.SubmitWords(word);
+                    await wsClient.SubmitWordsAsync(word);
                 }
             }
             catch (Exception e)
@@ -45,10 +45,10 @@ namespace Shpora.WordSearcher
         {
             var (width, height) = await new MapDimensionsEstimator(wsClient).EstimateDimensions();
             Logger.Info($"Estimated map size: {width}x{height}");
-            var map = await new MapScanner(wsClient, width, height).ScanMap();
+            var map = await new SimpleMapScanner(wsClient, width, height).ScanMapAsync();
 
             var letters = FindLetters(map);
-            var words = TransformToLetters(letters, width);
+            var words = TransformFoundLettersToWords(letters, width);
 
             if (words.Any())
                 Logger.Info("Found words: " + string.Join(", ", words));
@@ -81,7 +81,7 @@ namespace Shpora.WordSearcher
             return letters;
         }
 
-        private static List<string> TransformToLetters(List<(int x, int y, char c)> letters, int width)
+        private static List<string> TransformFoundLettersToWords(List<(int x, int y, char c)> letters, int width)
         {
             var coordsToLetters = letters.ToDictionary(l => (l.x, l.y), l => l.c);
             var words = new List<string>();
@@ -89,9 +89,9 @@ namespace Shpora.WordSearcher
             {
                 var wordBuilder = new StringBuilder();
                 var (x, y) = coordsToLetters.Keys.First();
-                while (coordsToLetters.ContainsKey((((x - 7 - 1) + width) % width, y)))
-                    x = (x - 7 - 1 + width) % width;
-                for (; coordsToLetters.ContainsKey((x, y)); x = (x + 7 + 1) % width)
+                while (coordsToLetters.ContainsKey(((x - Constants.LetterSize - 1 + width) % width, y)))
+                    x = (x - Constants.LetterSize - 1 + width) % width;
+                for (; coordsToLetters.ContainsKey((x, y)); x = (x + Constants.LetterSize + 1) % width)
                 {
                     wordBuilder.Append(coordsToLetters[(x, y)]);
                     coordsToLetters.Remove((x, y));
