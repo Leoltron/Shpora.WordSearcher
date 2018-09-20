@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdvancedMapScanner.cs" />
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Direction.cs" />
@@ -56,7 +57,7 @@
     <Compile Include="Logger.cs" />
     <Compile Include="LogLevelExtensions.cs" />
     <Compile Include="MapDimensionsEstimator.cs" />
-    <Compile Include="MapScanner.cs" />
+    <Compile Include="SimpleMapScanner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WordSearcher.cs" />

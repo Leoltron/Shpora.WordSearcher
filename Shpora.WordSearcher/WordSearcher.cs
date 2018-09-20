@@ -45,7 +45,7 @@ namespace Shpora.WordSearcher
         {
             var (width, height) = await new MapDimensionsEstimator(wsClient).EstimateDimensions();
             Logger.Info($"Estimated map size: {width}x{height}");
-            var map = await new MapScanner(wsClient, width, height).ScanMap();
+            var map = await new SimpleMapScanner(wsClient, width, height).ScanMap();
 
             var letters = FindLetters(map);
             var words = TransformToLetters(letters, width);

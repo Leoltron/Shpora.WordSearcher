@@ -4,20 +4,20 @@ using static Shpora.WordSearcher.Direction;
 
 namespace Shpora.WordSearcher
 {
-    public class MapScanner
+    public class SimpleMapScanner
     {
-        private readonly WordSearcherGameClient wsGameClient;
-        private readonly int mapWidth;
-        private readonly int mapHeight;
+        protected readonly WordSearcherGameClient wsGameClient;
+        protected readonly int mapWidth;
+        protected readonly int mapHeight;
 
-        public MapScanner(WordSearcherGameClient wsGameClient, int mapWidth, int mapHeight)
+        public SimpleMapScanner(WordSearcherGameClient wsGameClient, int mapWidth, int mapHeight)
         {
             this.wsGameClient = wsGameClient;
             this.mapWidth = mapWidth;
             this.mapHeight = mapHeight;
         }
 
-        public async Task<bool[,]> ScanMap()
+        public virtual async Task<bool[,]> ScanMap()
         {
             var map = new bool[mapWidth, mapHeight];
             void UpdateMap() => CopyMap(wsGameClient.CurrentView, map, wsGameClient.X, wsGameClient.Y);
@@ -47,6 +47,10 @@ namespace Shpora.WordSearcher
             return map;
         }
 
+        protected void CopyMapFromWsClient(bool[,] to)
+        {
+            CopyMap(wsGameClient.CurrentView, to, wsGameClient.X, wsGameClient.Y);
+        }
 
         private static void CopyMap(bool[,] from, bool[,] to, int offsetX, int offsetY)
         {
