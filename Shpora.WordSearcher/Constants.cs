@@ -6,5 +6,7 @@
         public const int VisibleFieldHeight = 5;
 
         public const int LetterSize = 7;
+
+        public const int RequestAttempts = 2;
     }
 }

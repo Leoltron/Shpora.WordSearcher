@@ -46,7 +46,7 @@ namespace Shpora.WordSearcher
             if (test)
                 request += "?test=true";
 
-            var response = await client.PostAsync(request, null);
+            var response = await client.PostAsync(request, null, Constants.RequestAttempts);
             response.EnsureSuccessStatusCode();
             SessionInProgress = true;
 
@@ -72,7 +72,7 @@ namespace Shpora.WordSearcher
 
         public async Task UpdateStatsAsync()
         {
-            var response = await client.GetAsync("/task/game/stats");
+            var response = await client.GetAsync("/task/game/stats", Constants.RequestAttempts);
             var stats = await response.DeserializeContent<Dictionary<string, int>>();
             Words = stats["words"];
             Points = stats["points"];
@@ -87,7 +87,7 @@ namespace Shpora.WordSearcher
             HttpResponseMessage response = null;
             for (var i = 0; i < amount; i++)
             {
-                response = await client.PostAsync(request, null);
+                response = await client.PostAsync(request, null, Constants.RequestAttempts);
                 response.EnsureSuccessStatusCode();
             }
 
@@ -99,7 +99,7 @@ namespace Shpora.WordSearcher
 
         public async Task MoveAsync(Direction direction, bool updateView = true)
         {
-            var response = await client.PostAsync($"/task/move/{direction}", null);
+            var response = await client.PostAsync($"/task/move/{direction}", null, Constants.RequestAttempts);
             response.EnsureSuccessStatusCode();
             CurrentView = updateView ? ReadField(await response.Content.ReadAsStringAsync()) : EmptyField;
             var (dx, dy) = direction.ToCoordsChange();
@@ -126,7 +126,7 @@ namespace Shpora.WordSearcher
         {
             var wordsJson = JsonConvert.SerializeObject(words);
             var content = new StringContent(wordsJson, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("/task/words/", content);
+            var response = await client.PostAsync("/task/words/", content, Constants.RequestAttempts);
             var pointsInDict = await response.DeserializeContent<Dictionary<string, int>>();
             var pointsReceived = pointsInDict["points"];
             Logger.Log.Info($"Received {pointsReceived} for " + wordsJson);
@@ -135,7 +135,7 @@ namespace Shpora.WordSearcher
 
         public async Task FinishGameAsync()
         {
-            var response = await client.PostAsync("/task/game/finish", null);
+            var response = await client.PostAsync("/task/game/finish", null, Constants.RequestAttempts);
             response.EnsureSuccessStatusCode();
             SessionInProgress = false;
             Points = (await response.DeserializeContent<Dictionary<string, int>>())["points"];
