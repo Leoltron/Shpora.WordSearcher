@@ -22,7 +22,7 @@ namespace Shpora.WordSearcher
 
             var linesRemain = mapHeight;
             mapWriter.UpdateMap();
-            Logger.Debug("Scan progress: 0%");
+            Logger.Log.Debug("Scan progress: 0%");
             while (true)
             {
                 for (var i = 0; i < mapWidth - Constants.VisibleFieldWidth; i++)
@@ -37,10 +37,10 @@ namespace Shpora.WordSearcher
                 if (linesRemain <= 0) break;
                 await wsGameClient.MoveAsync(Direction.Down, Math.Min(linesRemain, Constants.VisibleFieldHeight));
                 mapWriter.UpdateMap();
-                Logger.Debug($"Scan progress: {(int) (100 - (float) linesRemain / mapHeight * 100)}%");
+                Logger.Log.Debug($"Scan progress: {(int) (100 - (float) linesRemain / mapHeight * 100)}%");
             }
 
-            Logger.Debug("Scan progress: 100%");
+            Logger.Log.Debug("Scan progress: 100%");
 
             return mapWriter.Map;
         }

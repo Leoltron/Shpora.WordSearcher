@@ -129,7 +129,7 @@ namespace Shpora.WordSearcher
             var response = await client.PostAsync("/task/words/", content);
             var pointsInDict = await response.DeserializeContent<Dictionary<string, int>>();
             var pointsReceived = pointsInDict["points"];
-            Logger.Info($"Received {pointsReceived} for " + wordsJson);
+            Logger.Log.Info($"Received {pointsReceived} for " + wordsJson);
             return pointsReceived;
         }
 
@@ -143,7 +143,7 @@ namespace Shpora.WordSearcher
 
         public void LogStats()
         {
-            Logger.Info(string.Join(Environment.NewLine + "\t",
+            Logger.Log.Info(string.Join(Environment.NewLine + "\t",
                 "Session finished. Results:",
                 "Points: " + Points,
                 "Moves: " + Moves,

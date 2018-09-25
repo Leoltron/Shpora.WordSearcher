@@ -7,7 +7,7 @@ namespace Shpora.WordSearcher
         private static async Task Main(string[] args)
         {
             var (server, token) = ParseArgs(args);
-            Logger.Info($"Playing on server \"{server}\" with token \"{token}\"");
+            Logger.Log.Info($"Playing on server \"{server}\" with token \"{token}\"");
             var wsClient = new WordSearcherGameClient(server, token);
             var ws = new WordSearcher(wsClient);
             await ws.PlaySessionAsync();

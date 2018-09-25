@@ -28,7 +28,7 @@ namespace Shpora.WordSearcher
             Array.Copy(wsGameClient.CurrentView, borderView, wsGameClient.CurrentView.Length);
 
             var directionStr = direction.ToString().ToLowerInvariant();
-            Logger.Info($"Moving {directionStr} until see that non-empty view again");
+            Logger.Log.Info($"Moving {directionStr} until see that non-empty view again");
             var viewHashes = new List<long>();
             var length = 0;
             while (true)
@@ -41,11 +41,11 @@ namespace Shpora.WordSearcher
                     length++;
                     viewFound = wsGameClient.CurrentView.ArrayEquals(borderView);
                     if (viewFound && length < minLength)
-                        Logger.Warn("View found, but length is too little " +
+                        Logger.Log.Warn("View found, but length is too little " +
                                     $"({length}, expected at least {minLength}), continuing search...");
                 } while (!viewFound || length < minLength);
 
-                Logger.Info($"View found, going further {directionStr} to double-check that it's a full circle");
+                Logger.Log.Info($"View found, going further {directionStr} to double-check that it's a full circle");
                 var checkViewHashes = new List<long>(length);
                 var patternMatches = true;
                 for (var i = 0; i < length; i++)
@@ -54,7 +54,7 @@ namespace Shpora.WordSearcher
                     checkViewHashes.Add(wsGameClient.CurrentView.CustomHashCode());
                     if (checkViewHashes[i] != viewHashes[i])
                     {
-                        Logger.Info("Incorrect view, back to searching...");
+                        Logger.Log.Info("Incorrect view, back to searching...");
                         patternMatches = false;
                         viewHashes.AddRange(checkViewHashes);
                         break;
@@ -65,7 +65,7 @@ namespace Shpora.WordSearcher
                     break;
             }
 
-            Logger.Info($"Done, circle length is {length}.");
+            Logger.Log.Info($"Done, circle length is {length}.");
 
             return length;
         }
@@ -74,11 +74,11 @@ namespace Shpora.WordSearcher
         {
             if (wsGameClient.SeesAnything)
             {
-                Logger.Info("Already have a non-empty view, no search is required.");
+                Logger.Log.Info("Already have a non-empty view, no search is required.");
                 return;
             }
 
-            Logger.Info("Looking for a non-empty view for width and height estimation...");
+            Logger.Log.Info("Looking for a non-empty view for width and height estimation...");
             var linesChecked = 0;
             while (true)
             {
@@ -89,13 +89,13 @@ namespace Shpora.WordSearcher
                 if (foundSomething)
                     break;
 
-                Logger.Info(
+                Logger.Log.Info(
                     $"Found nothing in range {searchRange} on line, going {Constants.VisibleFieldHeight} lower... (current Y:{wsGameClient.Y})");
                 linesChecked++;
                 await wsGameClient.MoveAsync(Direction.Down, Constants.VisibleFieldHeight);
             }
 
-            Logger.Info("Non-empty view found.");
+            Logger.Log.Info("Non-empty view found.");
         }
 
         private static async Task<bool> MoveUntilSeeAnything(WordSearcherGameClient wsGameClient, Direction direction,

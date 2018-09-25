@@ -28,7 +28,7 @@ namespace Shpora.WordSearcher
             }
             catch (Exception e)
             {
-                Logger.Error(e);
+                Logger.Log.Error(e);
             }
             finally
             {
@@ -44,23 +44,23 @@ namespace Shpora.WordSearcher
         private async Task<List<string>> SearchForWords()
         {
             var (width, height) = await new MapDimensionsEstimator(wsClient).EstimateDimensions();
-            Logger.Info($"Estimated map size: {width}x{height}");
+            Logger.Log.Info($"Estimated map size: {width}x{height}");
             var map = await new SimpleMapScanner(wsClient, width, height).ScanMapAsync();
 
             var letters = FindLetters(map);
             var words = TransformFoundLettersToWords(letters, width);
 
             if (words.Any())
-                Logger.Info("Found words: " + string.Join(", ", words));
+                Logger.Log.Info("Found words: " + string.Join(", ", words));
             else
-                Logger.Warn("Found no words");
+                Logger.Log.Warn("Found no words");
 
             return words;
         }
 
         private static List<(int x, int y, char c)> FindLetters(bool[,] map)
         {
-            Logger.Info("Looking for letters...");
+            Logger.Log.Info("Looking for letters...");
             var lettersFound = 0;
             var width = map.GetLength(0);
             var height = map.GetLength(1);
@@ -76,7 +76,7 @@ namespace Shpora.WordSearcher
                 }
             }
 
-            Logger.Info("Letters found: " + lettersFound);
+            Logger.Log.Info("Letters found: " + lettersFound);
 
             return letters;
         }
