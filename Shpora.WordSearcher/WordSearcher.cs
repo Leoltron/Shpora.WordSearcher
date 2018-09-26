@@ -15,11 +15,11 @@ namespace Shpora.WordSearcher
             this.wsClient = wsClient;
         }
 
-        public async Task PlaySessionAsync()
+        public async Task PlaySessionAsync(bool useTestMap = false)
         {
             try
             {
-                await wsClient.InitGameAsync();
+                await wsClient.InitGameAsync(useTestMap);
                 var words = await SearchForWords();
                 foreach (var word in words.OrderBy(w => w.Length))
                 {
@@ -69,7 +69,7 @@ namespace Shpora.WordSearcher
             for (var y = 0; y < height; y++)
             {
                 var fragmentHash = map.CustomFragmentHashCode(x, y, 7, 7);
-                if (Letters.AlphabetViews.TryGetValue(fragmentHash, out var letter))
+                if (Letters.TryGetLetter(fragmentHash, out var letter))
                 {
                     letters.Add((x, y, letter));
                     lettersFound++;
