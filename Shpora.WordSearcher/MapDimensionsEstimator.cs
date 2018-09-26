@@ -84,7 +84,7 @@ namespace Shpora.WordSearcher
             {
                 var searchRange = 50 + linesChecked / 5 * 20;
                 var foundSomething =
-                    await MoveUntilSeeAnything(wsGameClient, (linesChecked & 1) == 0 ? Direction.Right : Direction.Left,
+                    await MoveUntilSeeAnything(wsGameClient, linesChecked % 2 == 0 ? Direction.Right : Direction.Left,
                         searchRange);
                 if (foundSomething)
                     break;
