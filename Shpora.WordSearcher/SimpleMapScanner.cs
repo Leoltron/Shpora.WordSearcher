@@ -18,6 +18,7 @@ namespace Shpora.WordSearcher
 
         public async Task<bool[,]> ScanMapAsync()
         {
+            Logger.Log.Info("Scanning...");
             var mapWriter = new MapWriter(wsGameClient, mapWidth, mapHeight);
 
             var linesRemain = mapHeight;
@@ -41,6 +42,7 @@ namespace Shpora.WordSearcher
             }
 
             Logger.Log.Debug("Scan progress: 100%");
+            Logger.Log.Info("Scan complete.");
 
             return mapWriter.Map;
         }
