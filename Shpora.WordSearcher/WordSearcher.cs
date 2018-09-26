@@ -36,7 +36,7 @@ namespace Shpora.WordSearcher
                 {
                     await wsClient.UpdateStatsAsync();
                     await wsClient.FinishGameAsync();
-                    wsClient.LogStats();
+                    wsClient.State.LogStats();
                 }
             }
         }

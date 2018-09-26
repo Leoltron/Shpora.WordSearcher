@@ -20,7 +20,7 @@
 
         private void CopyMapFromWsClient(bool[,] to)
         {
-            CopyMap(wsGameClient.CurrentView, to, wsGameClient.X, wsGameClient.Y);
+            CopyMap(wsGameClient.State.CurrentView, to, wsGameClient.State.X, wsGameClient.State.Y);
         }
 
         private static void CopyMap(bool[,] from, bool[,] to, int offsetX, int offsetY)

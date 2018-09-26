@@ -11,24 +11,14 @@ namespace Shpora.WordSearcher
 {
     public class WordSearcherGameClient
     {
-        private static readonly bool[,] EmptyField = new bool[0, 0];
         private readonly HttpClient client;
 
         public bool SessionInProgress { get; private set; }
 
-        public int Points { get; private set; }
-        public int Words { get; private set; }
-        public int Moves { get; private set; }
-
-        public bool[,] CurrentView { get; private set; }
-
-        public int X { get; private set; }
-        public int Y { get; private set; }
-
         public DateTime SessionStartDate { get; private set; }
         public DateTime SessionExpireDate { get; private set; }
 
-        public bool SeesAnything => CurrentView?.Any(b => b) ?? false;
+        public GameState State { get; private set; }
 
         public WordSearcherGameClient(string serverUrl, string token)
         {
@@ -60,23 +50,13 @@ namespace Shpora.WordSearcher
 
         private void ResetStats()
         {
-            Points = 0;
-            ResetCoords();
-        }
-
-        public void ResetCoords()
-        {
-            X = 0;
-            Y = 0;
+            State = new GameState();
         }
 
         public async Task UpdateStatsAsync()
         {
             var response = await client.GetAsync("/task/game/stats", Constants.RequestAttempts);
-            var stats = await response.DeserializeContent<Dictionary<string, int>>();
-            Words = stats["words"];
-            Points = stats["points"];
-            Moves = stats["moves"];
+            State.UpdateStats(await response.DeserializeContent<Dictionary<string, int>>());
         }
 
         public async Task MoveAsync(Direction direction, int amount, bool updateView = true)
@@ -91,26 +71,22 @@ namespace Shpora.WordSearcher
                 response.EnsureSuccessStatusCode();
             }
 
-            CurrentView = updateView ? ReadField(await response.Content.ReadAsStringAsync()) : EmptyField;
-            var (dx, dy) = direction.ToCoordsChange();
-            X += dx * amount;
-            Y += dy * amount;
+            var newView = updateView ? ReadView(await response.Content.ReadAsStringAsync()) : null;
+            State.UpdateStateFromMove(direction, newView, amount);
         }
 
         public async Task MoveAsync(Direction direction, bool updateView = true)
         {
             var response = await client.PostAsync($"/task/move/{direction}", null, Constants.RequestAttempts);
             response.EnsureSuccessStatusCode();
-            CurrentView = updateView ? ReadField(await response.Content.ReadAsStringAsync()) : EmptyField;
-            var (dx, dy) = direction.ToCoordsChange();
-            X += dx;
-            Y += dy;
+            var newView = updateView ? ReadView(await response.Content.ReadAsStringAsync()) : null;
+            State.UpdateStateFromMove(direction, newView);
         }
 
-        private static bool[,] ReadField(string fieldString)
+        private static bool[,] ReadView(string fieldString)
         {
             if (string.IsNullOrWhiteSpace(fieldString))
-                return EmptyField;
+                return null;
             var rows = fieldString.Split(new[] {"\r\n"}, StringSplitOptions.None);
             var field = new bool[rows.First().Length, rows.Length];
             for (var x = 0; x < field.GetLength(0); x++)
@@ -138,18 +114,7 @@ namespace Shpora.WordSearcher
             var response = await client.PostAsync("/task/game/finish", null, Constants.RequestAttempts);
             response.EnsureSuccessStatusCode();
             SessionInProgress = false;
-            Points = (await response.DeserializeContent<Dictionary<string, int>>())["points"];
-        }
-
-        public void LogStats()
-        {
-            Logger.Log.Info(string.Join(Environment.NewLine + "\t",
-                "Session finished. Results:",
-                "Points: " + Points,
-                "Moves: " + Moves,
-                "Points from words: " + (Points + Moves),
-                "Words submitted: " + Words
-            ));
+            State.Points = (await response.DeserializeContent<Dictionary<string, int>>())["points"];
         }
     }
 }

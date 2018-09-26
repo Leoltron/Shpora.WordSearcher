@@ -54,6 +54,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Direction.cs" />
     <Compile Include="DirectionExtensions.cs" />
+    <Compile Include="GameState.cs" />
     <Compile Include="HttpClientExtensions.cs" />
     <Compile Include="HttpResponseMessageExtensions.cs" />
     <Compile Include="Letters.cs" />

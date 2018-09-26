@@ -4,6 +4,6 @@ namespace Shpora.WordSearcher
 {
     public static class Logger
     {
-        public static readonly ILog Log = LogManager.GetLogger("Logger.Log");
+        public static readonly ILog Log = LogManager.GetLogger("Logger");
     }
 }

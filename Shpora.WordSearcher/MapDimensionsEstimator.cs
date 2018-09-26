@@ -25,7 +25,7 @@ namespace Shpora.WordSearcher
         {
             await FindNonEmptyView(wsGameClient);
             var borderView = new bool[Constants.VisibleFieldWidth, Constants.VisibleFieldHeight];
-            Array.Copy(wsGameClient.CurrentView, borderView, wsGameClient.CurrentView.Length);
+            Array.Copy(wsGameClient.State.CurrentView, borderView, wsGameClient.State.CurrentView.Length);
 
             var directionStr = direction.ToString().ToLowerInvariant();
             Logger.Log.Info($"Moving {directionStr} until see that non-empty view again");
@@ -37,9 +37,9 @@ namespace Shpora.WordSearcher
                 do
                 {
                     await wsGameClient.MoveAsync(direction);
-                    viewHashes.Add(wsGameClient.CurrentView.CustomHashCode());
+                    viewHashes.Add(wsGameClient.State.CurrentView.CustomHashCode());
                     length++;
-                    viewFound = wsGameClient.CurrentView.ArrayEquals(borderView);
+                    viewFound = wsGameClient.State.CurrentView.ArrayEquals(borderView);
                     if (viewFound && length < minLength)
                         Logger.Log.Warn("View found, but length is too little " +
                                     $"({length}, expected at least {minLength}), continuing search...");
@@ -51,7 +51,7 @@ namespace Shpora.WordSearcher
                 for (var i = 0; i < length; i++)
                 {
                     await wsGameClient.MoveAsync(direction);
-                    checkViewHashes.Add(wsGameClient.CurrentView.CustomHashCode());
+                    checkViewHashes.Add(wsGameClient.State.CurrentView.CustomHashCode());
                     if (checkViewHashes[i] != viewHashes[i])
                     {
                         Logger.Log.Info("Incorrect view, back to searching...");
@@ -72,7 +72,7 @@ namespace Shpora.WordSearcher
 
         private static async Task FindNonEmptyView(WordSearcherGameClient wsGameClient)
         {
-            if (wsGameClient.SeesAnything)
+            if (wsGameClient.State.SeesAnything)
             {
                 Logger.Log.Info("Already have a non-empty view, no search is required.");
                 return;
@@ -90,7 +90,7 @@ namespace Shpora.WordSearcher
                     break;
 
                 Logger.Log.Info(
-                    $"Found nothing in range {searchRange} on line, going {Constants.VisibleFieldHeight} lower... (current Y:{wsGameClient.Y})");
+                    $"Found nothing in range {searchRange} on line, going {Constants.VisibleFieldHeight} lower... (current Y:{wsGameClient.State.Y})");
                 linesChecked++;
                 await wsGameClient.MoveAsync(Direction.Down, Constants.VisibleFieldHeight);
             }
@@ -101,14 +101,14 @@ namespace Shpora.WordSearcher
         private static async Task<bool> MoveUntilSeeAnything(WordSearcherGameClient wsGameClient, Direction direction,
             int maxMoves = -1)
         {
-            while (!wsGameClient.SeesAnything && maxMoves != 0)
+            while (!wsGameClient.State.SeesAnything && maxMoves != 0)
             {
                 await wsGameClient.MoveAsync(direction);
                 if (maxMoves > 0)
                     maxMoves--;
             }
 
-            return wsGameClient.SeesAnything;
+            return wsGameClient.State.SeesAnything;
         }
     }
 }
