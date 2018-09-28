@@ -66,6 +66,8 @@
     <Compile Include="Logger.cs" />
     <Compile Include="MapDimensionsEstimator.cs" />
     <Compile Include="MapWriter.cs" />
+    <Compile Include="OtherMapDimensionsEstimator.cs" />
+    <Compile Include="ViewHashRecorder.cs" />
     <Compile Include="SimpleMapScanner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

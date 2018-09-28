@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -19,6 +20,7 @@ namespace Shpora.WordSearcher
         public DateTime SessionExpireDate { get; private set; }
 
         public GameState State { get; private set; }
+        public ViewHashRecorder ViewHashRecorder { get; } = new ViewHashRecorder();
 
         public WordSearcherGameClient(string serverUrl, string token)
         {
@@ -37,6 +39,12 @@ namespace Shpora.WordSearcher
                 request += "?test=true";
 
             var response = await client.PostAsync(request, null, Constants.RequestAttempts);
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                Logger.Log.Warn("Received Conflict response code, probably there is unfinished session, trying again");
+                response = await client.PostAsync(request, null, Constants.RequestAttempts);
+            }
+
             response.EnsureSuccessStatusCode();
             SessionInProgress = true;
 
@@ -59,28 +67,29 @@ namespace Shpora.WordSearcher
             State.UpdateStats(await response.DeserializeContent<Dictionary<string, int>>());
         }
 
-        public async Task MoveAsync(Direction direction, int amount, bool updateView = true)
+        public async Task MoveAsync(Direction direction, int amount)
         {
             if (amount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(amount), amount, "Value must be positive");
-            var request = $"/task/move/{direction}";
-            HttpResponseMessage response = null;
             for (var i = 0; i < amount; i++)
-            {
-                response = await client.PostAsync(request, null, Constants.RequestAttempts);
-                response.EnsureSuccessStatusCode();
-            }
-
-            var newView = updateView ? ReadView(await response.Content.ReadAsStringAsync()) : null;
-            State.UpdateStateFromMove(direction, newView, amount);
+                await MoveAsync(direction);
         }
 
-        public async Task MoveAsync(Direction direction, bool updateView = true)
+        public async Task MoveAsync(Direction direction)
         {
             var response = await client.PostAsync($"/task/move/{direction}", null, Constants.RequestAttempts);
             response.EnsureSuccessStatusCode();
-            var newView = updateView ? ReadView(await response.Content.ReadAsStringAsync()) : null;
+            var newView = ReadView(await response.Content.ReadAsStringAsync());
+            ViewHashRecorder.AddHash(newView);
             State.UpdateStateFromMove(direction, newView);
+        }
+
+        public async Task MoveAsync(int x, int y)
+        {
+            if (x != 0)
+                await MoveAsync(x > 0 ? Direction.Right : Direction.Left, Math.Abs(x));
+            if (y != 0)
+                await MoveAsync(y > 0 ? Direction.Down : Direction.Up, Math.Abs(y));
         }
 
         private static bool[,] ReadView(string fieldString)

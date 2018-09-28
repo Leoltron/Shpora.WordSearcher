@@ -43,7 +43,7 @@ namespace Shpora.WordSearcher
 
         private async Task<List<string>> SearchForWords()
         {
-            var (width, height) = await new MapDimensionsEstimator(wsClient).EstimateDimensions();
+            var (width, height) = await new OtherMapDimensionsEstimator(wsClient).EstimateDimensions();
             Logger.Log.Info($"Estimated map size: {width}x{height}");
             var map = await new SimpleMapScanner(wsClient, width, height).ScanMapAsync();
 

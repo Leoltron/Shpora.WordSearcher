@@ -14,20 +14,11 @@ namespace Shpora.WordSearcher
             this.wsClient = wsClient;
         }
 
-        public List<(int relativeX, int relativeY, char c, int visibleArea)> FindLettersInCurrentView()
+        public List<(int relativeX, int relativeY, char c, int visibleArea)> FindLettersInCurrentView(bool ignoreEmptyFragments)
         {
-            var lines = new List<string>();
-            for (var y = 0; y < Constants.VisibleFieldHeight; y++)
-            {
-                var sb = new StringBuilder();
-
-                for (var x = 0; x < Constants.VisibleFieldWidth; x++)
-                    sb.Append(wsClient.State.CurrentView[x, y] ? '#' : '_');
-                lines.Add(sb.ToString());
-            }
-
-            Logger.Log.Info("Looking for letters in view:" + Environment.NewLine +
-                            string.Join(Environment.NewLine, lines));
+            Logger.Log.Info($"Looking for letters at ({wsClient.State.X}, {wsClient.State.Y}) in view:" +
+                            Environment.NewLine +
+                            wsClient.State.CurrentView.ToViewString());
 
             var letters = new List<(int, int, char, int)>();
             var viewRect = new Rect(0, 0, Constants.VisibleFieldWidth, Constants.VisibleFieldHeight);
@@ -48,7 +39,7 @@ namespace Shpora.WordSearcher
                 var letterY = inter.Y - y;
                 var fragmentHash = wsClient.State.CurrentView
                     .CustomFragmentHashCode(inter.X, inter.Y, inter.Width, inter.Height);
-                if (fragmentHash == 0)
+                if (ignoreEmptyFragments && fragmentHash == 0)
                     continue;
                 foreach (var (c, view) in Letters.All)
                 {
@@ -61,8 +52,13 @@ namespace Shpora.WordSearcher
 
             Logger.Log.Info("Found letters:\n" +
                             string.Join("\n",
-                                letters.OrderByDescending(l => l.Item4).Select(l =>
-                                    $"{l.Item3} at ({l.Item1}, {l.Item2}) with {l.Item4 * 100 / (Constants.LetterSize * Constants.LetterSize)}%")));
+                                letters.OrderByDescending(l => l.Item4)
+                                    .Take(3)
+                                    .Select(l => $"{l.Item3} at ({l.Item1}, {l.Item2}) " +
+                                                 $"with {l.Item4 * 100 / (Constants.LetterSize * Constants.LetterSize)}%")
+                                    .Concat(letters.Count > 3
+                                        ? new[] {$"And {letters.Count - 3} more"}
+                                        : new string[0])));
 
             return letters;
         }

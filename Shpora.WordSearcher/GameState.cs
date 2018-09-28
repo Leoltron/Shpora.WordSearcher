@@ -17,6 +17,8 @@ namespace Shpora.WordSearcher
         public int X { get; set; }
         public int Y { get; set; }
 
+        
+
         public void UpdateStats(Dictionary<string, int> stats)
         {
             Words = stats["words"];

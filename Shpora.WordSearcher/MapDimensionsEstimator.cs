@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Shpora.WordSearcher
 {
     public class MapDimensionsEstimator
     {
-        private readonly WordSearcherGameClient wsGameClient;
+        protected readonly WordSearcherGameClient wsGameClient;
 
         public MapDimensionsEstimator(WordSearcherGameClient wsGameClient)
         {
             this.wsGameClient = wsGameClient;
         }
 
-        public async Task<(int width, int height)> EstimateDimensions()
+        public virtual async Task<(int width, int height)> EstimateDimensions()
         {
             return (await MakeCircle(Direction.Right), await MakeCircle(Direction.Down));
         }
@@ -70,7 +71,7 @@ namespace Shpora.WordSearcher
             return length;
         }
 
-        private static async Task FindNonEmptyView(WordSearcherGameClient wsGameClient)
+        protected static async Task FindNonEmptyView(WordSearcherGameClient wsGameClient)
         {
             if (wsGameClient.State.SeesAnything)
             {
@@ -94,6 +95,21 @@ namespace Shpora.WordSearcher
                 linesChecked++;
                 await wsGameClient.MoveAsync(Direction.Down, Constants.VisibleFieldHeight);
             }
+            /*
+            var ls = new LetterSearcher(wsGameClient);
+            var ltrs = ls.FindLettersInCurrentView();
+            while (ltrs.Any() && ltrs.Max(l => l.visibleArea) * 100 / (Constants.LetterSize * Constants.LetterSize) < 60)
+            {
+                var x = ltrs.Sum(l => l.relativeX) / ltrs.Count;
+                var y = ltrs.Sum(l => l.relativeY) / ltrs.Count;
+                Logger.Log.Info($"Moving by ({x}, {y})");
+                if (x != 0)
+                    await wsGameClient.MoveAsync(x > 0 ? Direction.Right : Direction.Left, Math.Abs(x));
+                if (y != 0)
+                    await wsGameClient.MoveAsync(y > 0 ? Direction.Down : Direction.Up, Math.Abs(y));
+                ltrs = ls.FindLettersInCurrentView();
+            }
+            */
 
             Logger.Log.Info("Non-empty view found.");
         }
