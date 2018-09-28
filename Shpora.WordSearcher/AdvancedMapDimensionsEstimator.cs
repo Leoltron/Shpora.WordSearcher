@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace Shpora.WordSearcher
 {
-    public class OtherMapDimensionsEstimator : MapDimensionsEstimator
+    public class AdvancedMapDimensionsEstimator : MapDimensionsEstimator
     {
         private readonly LetterSearcher letterSearcher;
 
-        public OtherMapDimensionsEstimator(WordSearcherGameClient wsGameClient) : base(wsGameClient)
+        public AdvancedMapDimensionsEstimator(WordSearcherGameClient wsGameClient) : base(wsGameClient)
         {
             letterSearcher = new LetterSearcher(wsGameClient);
         }
