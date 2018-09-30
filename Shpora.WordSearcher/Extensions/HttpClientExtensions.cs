@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Shpora.WordSearcher
+namespace Shpora.WordSearcher.Extensions
 {
     public static class HttpClientExtensions
     {

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace Shpora.WordSearcher
+namespace Shpora.WordSearcher.Extensions
 {
     public static class HttpResponseMessageExtensions
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Shpora.WordSearcher
+namespace Shpora.WordSearcher.Extensions
 {
     public static class DirectionExtensions
     {
