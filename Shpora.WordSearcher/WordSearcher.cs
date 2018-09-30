@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Shpora.WordSearcher.Extensions;
 
 namespace Shpora.WordSearcher
 {
@@ -43,7 +44,7 @@ namespace Shpora.WordSearcher
 
         private async Task<List<string>> SearchForWords()
         {
-            var (width, height) = await new AdvancedMapDimensionsEstimator(wsClient).EstimateDimensions();
+            var (width, height) = await new MapDimensionsEstimator(wsClient).EstimateDimensions();
             Logger.Log.Info($"Estimated map size: {width}x{height}");
             var map = await new SimpleMapScanner(wsClient, width, height).ScanMapAsync();
 

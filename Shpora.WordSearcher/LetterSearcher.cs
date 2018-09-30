@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Shpora.WordSearcher.Extensions;
 
 namespace Shpora.WordSearcher
 {
@@ -16,10 +15,6 @@ namespace Shpora.WordSearcher
 
         public List<(int relativeX, int relativeY, char c, int visibleArea)> FindLettersInCurrentView(bool ignoreEmptyFragments)
         {
-            Logger.Log.Info($"Looking for letters at ({wsClient.State.X}, {wsClient.State.Y}) in view:" +
-                            Environment.NewLine +
-                            wsClient.State.CurrentView.ToViewString());
-
             var letters = new List<(int, int, char, int)>();
             var viewRect = new Rect(0, 0, Constants.VisibleFieldWidth, Constants.VisibleFieldHeight);
             for (var x = -Constants.LetterSize + 1; x < Constants.VisibleFieldWidth; x++)
@@ -27,11 +22,6 @@ namespace Shpora.WordSearcher
             {
                 var letterRect = new Rect(x, y, Constants.LetterSize, Constants.LetterSize);
                 var inter = Intersection(viewRect, letterRect);
-                if (inter.Width <= 0 || inter.Height <= 0)
-                {
-                    Logger.Log.Warn($"WTF? x:{x} y:{y}");
-                    continue;
-                }
 
                 if (!IsViewFragmentBordered(inter))
                     continue;
@@ -49,16 +39,6 @@ namespace Shpora.WordSearcher
                     }
                 }
             }
-
-            Logger.Log.Info("Found letters:\n" +
-                            string.Join("\n",
-                                letters.OrderByDescending(l => l.Item4)
-                                    .Take(3)
-                                    .Select(l => $"{l.Item3} at ({l.Item1}, {l.Item2}) " +
-                                                 $"with {l.Item4 * 100 / (Constants.LetterSize * Constants.LetterSize)}%")
-                                    .Concat(letters.Count > 3
-                                        ? new[] {$"And {letters.Count - 3} more"}
-                                        : new string[0])));
 
             return letters;
         }
@@ -103,7 +83,7 @@ namespace Shpora.WordSearcher
             return true;
         }
 
-        private Rect Intersection(Rect r1, Rect r2)
+        private static Rect Intersection(Rect r1, Rect r2)
         {
             var iRight = Math.Min(r1.Right, r2.Right);
             var iLeft = Math.Max(r1.Left, r2.Left);

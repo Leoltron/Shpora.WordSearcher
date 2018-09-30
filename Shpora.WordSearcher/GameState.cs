@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Shpora.WordSearcher.Extensions;
 
 namespace Shpora.WordSearcher
 {
@@ -11,13 +12,12 @@ namespace Shpora.WordSearcher
         public int Words { get; set; }
         public int Moves { get; set; }
 
-        public bool[,] CurrentView { get; set; }
+        public bool[,] CurrentView { get; private set; }
         public bool SeesAnything => CurrentView?.Any(b => b) ?? false;
 
-        public int X { get; set; }
-        public int Y { get; set; }
+        public int X { get; private set; }
+        public int Y { get; private set; }
 
-        
 
         public void UpdateStats(Dictionary<string, int> stats)
         {

@@ -10,7 +10,7 @@
         public MapWriter(WordSearcherGameClient wsGameClient, int mapWidth, int mapHeight)
         {
             this.wsGameClient = wsGameClient;
-            map = new bool[mapWidth,mapHeight];
+            map = new bool[mapWidth, mapHeight];
         }
 
         public void UpdateMap()

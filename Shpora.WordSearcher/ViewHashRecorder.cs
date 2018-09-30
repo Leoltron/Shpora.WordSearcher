@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Shpora.WordSearcher.Extensions;
 
 namespace Shpora.WordSearcher
 {
@@ -7,7 +8,7 @@ namespace Shpora.WordSearcher
     {
         private readonly List<long> lastViewHashes = new List<long>();
         public List<long> LastViewHashes => new List<long>(lastViewHashes);
-        public bool RecordHashes { get; set; }
+        private bool RecordHashes { get; set; }
 
         public void ClearPreviousHashes()
         {
