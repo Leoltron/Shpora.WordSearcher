@@ -53,20 +53,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArrayExtensions.cs" />
+    <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Direction.cs" />
-    <Compile Include="DirectionExtensions.cs" />
+    <Compile Include="Extensions\DirectionExtensions.cs" />
     <Compile Include="GameState.cs" />
-    <Compile Include="HttpClientExtensions.cs" />
-    <Compile Include="HttpResponseMessageExtensions.cs" />
+    <Compile Include="Extensions\HttpClientExtensions.cs" />
+    <Compile Include="Extensions\HttpResponseMessageExtensions.cs" />
     <Compile Include="Letters.cs" />
     <Compile Include="LetterSearcher.cs" />
-    <Compile Include="ListExtensions.cs" />
+    <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="MapDimensionsEstimator.cs" />
     <Compile Include="MapWriter.cs" />
-    <Compile Include="AdvancedMapDimensionsEstimator.cs" />
+    <Compile Include="MapDimensionsEstimator.cs" />
     <Compile Include="ViewHashRecorder.cs" />
     <Compile Include="SimpleMapScanner.cs" />
     <Compile Include="Program.cs" />
